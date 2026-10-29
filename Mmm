@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>تجربة توعوية</title>
+<style>
+:root{--bg1:#cfe0ee;--bg2:#e8b25a;--card:#e9d9a8;--text:#3b2a14;--btn:#6b8e23;--btn2:#8a6a3d;--cash:#d9822b;--cell:#d8c593;--act:#f4e7b8;--safe:#8fc46a;--trap:#d9534f;--head:#5a4326}
+*{box-sizing:border-box;font-family:Tahoma,Arial,sans-serif}
+body{margin:0;background:linear-gradient(var(--bg1),var(--bg2));min-height:100vh;padding:12px;color:var(--text);display:flex;justify-content:center}
+body.dark{background:#2b2b2b;color:#eee}
+.w{width:100%;max-width:440px}
+h1{text-align:center;margin:4px 0 10px;font-size:22px}
+.warn{background:#7a1f1f;color:#fff;border-radius:8px;padding:12px;font-size:15px;margin-bottom:8px;line-height:1.7;font-weight:bold}
+.official{background:#fff3cd;color:#3b2a14;border:2px solid #c9a24b;border-radius:8px;padding:10px;font-size:13px;margin-bottom:10px;line-height:1.7}
+.banner{background:var(--head);color:#fff;border-radius:8px;padding:10px;margin-bottom:10px;text-align:center}
+.card{background:var(--card);border-radius:10px;padding:12px;margin-bottom:10px}
+input,button,select{font-size:16px;padding:10px;border-radius:8px;border:1px solid #7a6340}
+input{width:100%;margin-bottom:8px}
+button{border:0;background:var(--btn);color:#fff;font-weight:bold}
+button.g{background:var(--btn2)}button.o{background:var(--cash)}button.r{background:#a33}button.b{background:#456}
+button:disabled{opacity:.5}
+.row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.mult{width:60px;text-align:center;font-weight:bold;font-size:14px}
+.cell{flex:1;height:46px;background:var(--cell);border:2px solid #7a6340;color:#000;font-size:22px}
+.cell.act{background:var(--act);box-shadow:0 0 8px #c9a24b}
+.cell.safe{background:var(--safe)}.cell.trap{background:var(--trap)}
+.bal{background:#555;color:#fff;border-radius:10px;padding:8px 14px;font-weight:bold;text-align:center}
+.st{font-size:13px;line-height:1.8}.hide{display:none}
+.dark .card{background:#3a3a3a;color:#eee}
+.dark input{background:#fff;color:#000}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+.tabs button{flex:1;background:#456}.tabs button.on{background:var(--btn)}
+.acc{border:1px solid #666;border-radius:8px;padding:8px;margin-bottom:8px;font-size:13px;line-height:1.8}
+.acc button{padding:6px 9px;font-size:13px;margin:2px}
+label{display:block;font-size:13px;margin:6px 0 2px}
+.cl{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.cl input{width:60px;height:38px;margin:0;padding:2px}
+</style></head>
+<body><div class="w">
+
+<!-- ================= اللعبة ================= -->
+<div id="gameApp">
+  <h1 data-t="title"></h1>
+  <div class="warn">⚠️ المراهنات خطأ وخطر حقيقي على الفرد والمجتمع. لا تراهن أبدًا.</div>
+  <div class="official">📢 <b>تنبيه رسمي:</b> هذه تجربة توعوية. الألعاب هنا <b>مضبوطة لصالح المنصة</b> كما في منصات المراهنات الحقيقية، والرصيد <b>وهمي بالكامل</b> ولا توجد أي أموال حقيقية. نخزّن اسم المستخدم وكلمة سر مشفّرة ونتائجك فقط.</div>
+  <div class="banner hide" id="banner" data-t="banner"></div>
+
+  <div id="auth" class="card hide">
+    <input id="u" placeholder="اسم المستخدم (حروف إنجليزي أو أرقام)" autocomplete="username">
+    <input id="p" type="password" placeholder="كلمة السر (6 أحرف على الأقل)">
+    <div class="row"><button id="bl" style="flex:1" data-t="btnLogin"></button><button id="br" class="g" style="flex:1" data-t="btnReg"></button></div>
+    <div id="aerr" style="color:#a00"></div>
+  </div>
+
+  <div id="game" class="hide">
+    <div class="row"><div class="bal" id="bal" style="flex:1"></div><button class="g" id="out" data-t="btnOut"></button></div>
+    <div class="card st" id="stats"></div>
+    <div class="card" id="msg" style="text-align:center;background:var(--head);color:#fff"></div>
+    <div class="row"><button id="m2" style="flex:1">2x</button><button id="m3" class="g" style="flex:1">3x</button></div>
+    <div class="card" id="board"></div>
+    <div class="row">
+      <input id="bet" type="number" min="1" style="margin:0;width:110px">
+      <button id="start" style="flex:1" data-t="btnStart"></button>
+      <button id="cash" class="o" style="flex:1" disabled></button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= لوحة التحكم ================= -->
+<div id="adminApp" class="hide">
+  <div id="alogin" class="card"><b>لوحة المشرف</b><br><br>
+    <input id="pin" type="password" placeholder="الرقم السري">
+    <button id="go">دخول</button> <span id="err" style="color:#f88"></span>
+  </div>
+  <div id="apanel" class="hide">
+    <div class="card" id="astats" style="line-height:1.9"></div>
+    <div class="tabs">
+      <button data-tab="t1" class="on">الحسابات</button>
+      <button data-tab="t2">النصوص</button>
+      <button data-tab="t3">الألوان</button>
+      <button data-tab="t4">الإعدادات</button>
+    </div>
+    <div id="t1" class="card"></div>
+    <div id="t2" class="card hide"></div>
+    <div id="t3" class="card hide"></div>
+    <div id="t4" class="card hide"></div>
+    <button class="r" id="aout">خروج</button>
+  </div>
+</div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script>
+const ADMIN_PIN="jMDENXh0E_TP71";
+firebase.initializeApp({
+  apiKey:"AIzaSyC0WWJQgh4lEYbOqfKFMcI1vLgwJS5DwCQ",
+  authDomain:"xtra-f3087.firebaseapp.com",
+  databaseURL:"https://xtra-f3087-default-rtdb.firebaseio.com",
+  projectId:"xtra-f3087",
+  storageBucket:"xtra-f3087.firebasestorage.app",
+  messagingSenderId:"122881932496",
+  appId:"1:122881932496:web:cf63664e63e38176d332d5"
+});
+const DB=firebase.database();
+const $=id=>document.getElementById(id);
+const f=n=>Number(n).toLocaleString("en",{maximumFractionDigits:2});
+const r2=n=>Math.round(n*100)/100;
+const IS_ADMIN=location.search.includes("admin")||location.hash.includes("admin");
+
+/* ---------- الإعدادات الافتراضية (قابلة للتعديل من اللوحة) ---------- */
+const DEF={
+  texts:{
+    title:"سلّم الغرب - تجربة توعوية",
+    banner:"",
+    msgStart:"اختار الصعوبة وحط رهانك",
+    msgFirst:"اختار خانة في الصف الأول",
+    msgNext:"كمّل أو اسحب",
+    msgLost:"وقعت في فخ! المراهنة خسارة في النهاية",
+    msgWin:"وصلت للآخر وسحبت",
+    msgCash:"سحبت",
+    noBal:"الرصيد مش كفاية. المشرف فقط يضيف رصيد",
+    closedMsg:"هذا الحساب مغلق",
+    regClosed:"التسجيل مغلق حاليًا",
+    btnStart:"ابدأ", btnCash:"اسحب", btnLogin:"دخول", btnReg:"حساب جديد", btnOut:"خروج"
+  },
+  colors:{bg1:"#cfe0ee",bg2:"#e8b25a",card:"#e9d9a8",text:"#3b2a14",btn:"#6b8e23",btn2:"#8a6a3d",cash:"#d9822b",cell:"#d8c593",act:"#f4e7b8",safe:"#8fc46a",trap:"#d9534f",head:"#5a4326"},
+  initial:100000, registration:true, minBet:1, defBet:1000, rtp:96
+};
+const TLABEL={title:"عنوان اللعبة",banner:"إعلان أعلى الشاشة (اتركه فاضي لإخفائه)",msgStart:"رسالة البداية",msgFirst:"رسالة أول صف",msgNext:"رسالة كمّل أو اسحب",msgLost:"رسالة الخسارة",msgWin:"رسالة الوصول للآخر",msgCash:"رسالة السحب",noBal:"رسالة الرصيد لا يكفي",closedMsg:"رسالة الحساب المغلق",regClosed:"رسالة التسجيل المغلق",btnStart:"زر ابدأ",btnCash:"زر اسحب",btnLogin:"زر دخول",btnReg:"زر حساب جديد",btnOut:"زر خروج"};
+const CLABEL={bg1:"خلفية (أعلى)",bg2:"خلفية (أسفل)",card:"لون البطاقات",text:"لون الكلام",btn:"لون الأزرار",btn2:"لون الأزرار الثانوية",cash:"لون زر السحب",cell:"لون الخانات",act:"لون الخانة النشطة",safe:"لون الخانة الآمنة",trap:"لون الفخ",head:"لون شريط الرسائل"};
+let CFG=JSON.parse(JSON.stringify(DEF));
+function merge(c){
+  c=c||{};
+  CFG={texts:Object.assign({},DEF.texts,c.texts||{}),colors:Object.assign({},DEF.colors,c.colors||{}),
+    initial:c.initial!=null?+c.initial:DEF.initial,registration:c.registration!==false,
+    minBet:c.minBet!=null?+c.minBet:DEF.minBet,defBet:c.defBet!=null?+c.defBet:DEF.defBet,
+    rtp:c.rtp!=null?+c.rtp:DEF.rtp};
+}
+function applyCfg(){
+  for(const k in CFG.colors)document.documentElement.style.setProperty("--"+k,CFG.colors[k]);
+  document.querySelectorAll("[data-t]").forEach(e=>{e.textContent=CFG.texts[e.dataset.t]||"";});
+  $("banner").classList.toggle("hide",!CFG.texts.banner);
+  document.title=CFG.texts.title||"تجربة توعوية";
+}
+const RTP=()=>Math.min(99,Math.max(1,CFG.rtp))/100;
+const mult=(m,k)=>r2(RTP()*Math.pow(m/(m-1),k));
+const rnd=()=>crypto.getRandomValues(new Uint32Array(1))[0]/4294967296;
+async function hash(s){
+  const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("ws:"+s));
+  return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
+}
+
+/* ================= اللعبة ================= */
+const ROWS=6, SESS="ws_sess";
+const show=n=>["auth","game"].forEach(x=>$(x).classList.toggle("hide",x!==n));
+let ref=null,U=null,name=null,mode=2,lastLoss=null,prev=-1;
+
+function attach(n){
+  name=n; ref=DB.ref("users/"+n); localStorage.setItem(SESS,n); prev=-1;
+  ref.on("value",s=>{
+    U=s.val();
+    if(!U||U.closed){logout(CFG.texts.closedMsg);return;}
+    show("game"); render();
+    if(prev>=0&&U.rounds>prev&&U.rounds%5===0)
+      alert("بعد "+U.rounds+" جولات: خسرت "+U.losses+" مرة، وصافي نتيجتك "+f(U.returned-U.wagered)+". المراهنات خطأ وخطر حقيقي، والمنصات مصممة لتخسر في النهاية.");
+    prev=U.rounds;
+  });
+}
+function logout(t){
+  if(ref)ref.off(); ref=null;U=null;name=null;localStorage.removeItem(SESS);
+  show("auth"); $("aerr").textContent=t||"";
+}
+function draw(){
+  const g=U.game, m=g?g.mode:(lastLoss?lastLoss.mode:mode), b=$("board"); b.innerHTML="";
+  for(let r=ROWS-1;r>=0;r--){
+    const row=document.createElement("div"); row.className="row";
+    const ml=document.createElement("div"); ml.className="mult"; ml.textContent="×"+mult(m,r+1); row.appendChild(ml);
+    for(let c=0;c<m;c++){
+      const x=document.createElement("button"); x.className="cell"; x.disabled=true;
+      if(g){
+        if(r<g.level)x.classList.add("safe");
+        if(r===g.level){x.disabled=false;x.classList.add("act");x.onclick=()=>pick(c);}
+      }else if(lastLoss){
+        if(r<lastLoss.row)x.classList.add("safe");
+        if(r===lastLoss.row&&c===lastLoss.col){x.classList.add("trap");x.textContent="💣";}
+      }
+      row.appendChild(x);
+    }
+    b.appendChild(row);
+  }
+}
+function render(){
+  $("bal").textContent="الرصيد (وهمي): "+f(U.balance)+" — "+name;
+  const net=U.returned-U.wagered, rtp=U.wagered?(U.returned/U.wagered*100).toFixed(1):"—";
+  $("stats").innerHTML="";
+  ["جولات: "+U.rounds+" | كسب: "+U.wins+" مرة | خسر: "+U.losses+" مرة",
+   "إجمالي ما راهنت به: "+f(U.wagered)+" | خسارتك الصافية: "+f(Math.max(0,-net)),
+   "نسبة العائد الفعلية: "+rtp+"%"].forEach(t=>{const d=document.createElement("div");d.textContent=t;$("stats").appendChild(d);});
+  const pl=!!U.game;
+  $("start").disabled=pl;$("bet").disabled=pl;$("m2").disabled=$("m3").disabled=pl;
+  const can=pl&&U.game.level>=1;
+  $("cash").disabled=!can;
+  $("cash").textContent=can?CFG.texts.btnCash+" "+f(U.game.bet*mult(U.game.mode,U.game.level)):CFG.texts.btnCash;
+  const cm=pl?U.game.mode:mode;
+  $("m2").className=cm===2?"":"g";$("m3").className=cm===3?"":"g";
+  if(!$("msg").textContent)$("msg").textContent=CFG.texts.msgStart;
+  draw();
+}
+function settle(win,msg){
+  ref.update({game:null,rounds:U.rounds+1,wins:U.wins+(win>0?1:0),losses:U.losses+(win>0?0:1),
+    returned:r2(U.returned+win),balance:r2(U.balance+win)});
+  $("msg").textContent=msg;
+}
+function pick(c){
+  if(!U||!U.game)return;
+  const g=U.game, s=(U.surv!=null)?U.surv/100:(g.mode-1)/g.mode;
+  if(rnd()>=s){lastLoss={row:g.level,col:c,mode:g.mode};settle(0,CFG.texts.msgLost);return;}
+  const lvl=g.level+1;
+  if(lvl===ROWS){const w=r2(g.bet*mult(g.mode,lvl));lastLoss=null;settle(w,CFG.texts.msgWin+" "+f(w));return;}
+  ref.child("game/level").set(lvl); $("msg").textContent=CFG.texts.msgNext;
+}
+function cash(){
+  if(!U||!U.game||U.game.level<1)return;
+  const w=r2(U.game.bet*mult(U.game.mode,U.game.level)); lastLoss=null; settle(w,CFG.texts.msgCash+" "+f(w));
+}
+function start(){
+  const bet=r2(parseFloat($("bet").value));
+  if(!U||U.game)return;
+  if(!(bet>=CFG.minBet))return $("msg").textContent="الرهان "+CFG.minBet+" على الأقل";
+  if(bet>U.balance)return $("msg").textContent=CFG.texts.noBal;
+  lastLoss=null;
+  ref.update({balance:r2(U.balance-bet),wagered:r2(U.wagered+bet),game:{bet,mode,level:0}});
+  $("msg").textContent=CFG.texts.msgFirst;
+}
+async function auth(kind){
+  const n=$("u").value.trim().toLowerCase(), p=$("p").value, err=t=>$("aerr").textContent=t;
+  if(!/^[a-z0-9_]{3,20}$/.test(n))return err("الاسم 3-20 حرف إنجليزي أو أرقام أو _");
+  if(p.length<6)return err("كلمة السر 6 أحرف على الأقل");
+  const h=await hash(p), r=DB.ref("users/"+n), snap=await r.get();
+  if(kind==="register"){
+    if(!CFG.registration)return err(CFG.texts.regClosed);
+    if(snap.exists())return err("الاسم مستخدم");
+    await r.set({pw:h,balance:CFG.initial,rounds:0,wins:0,losses:0,wagered:0,returned:0,closed:false,created:Date.now()});
+  }else{
+    const u=snap.val();
+    if(!u||u.pw!==h)return err("بيانات غلط");
+    if(u.closed)return err(CFG.texts.closedMsg);
+  }
+  err(""); lastLoss=null; $("msg").textContent=""; attach(n);
+}
+
+/* ================= لوحة التحكم ================= */
+function adminApp(){
+  $("gameApp").classList.add("hide"); $("adminApp").classList.remove("hide"); document.body.classList.add("dark");
+  let started=false;
+  const mk=(par,txt,cls,fn)=>{const b=document.createElement("button");b.textContent=txt;if(cls)b.className=cls;b.onclick=fn;par.appendChild(b);return b;};
+
+  function accounts(all){
+    const list=Object.entries(all||{}); let W=0,R=0;
+    list.forEach(([n,u])=>{W+=u.wagered||0;R+=u.returned||0;});
+    const p=W-R;
+    $("astats").textContent="الحسابات: "+list.length+" | إجمالي الرهانات: "+f(W)+" | إجمالي العائد: "+f(R)+" | ربح الموقع (وهمي): "+f(p)+" ("+(W?(p/W*100).toFixed(1):"—")+"%)";
+    const box=$("t1"); box.innerHTML="";
+    if(!list.length){box.textContent="مفيش حسابات لسه.";return;}
+    list.forEach(([n,u])=>{
+      const d=document.createElement("div"); d.className="acc";
+      const t=document.createElement("div");
+      t.textContent=n+" — "+(u.closed?"مغلق":"مفتوح")+" | الرصيد: "+f(u.balance)+" | كسب: "+(u.wins||0)+" | خسر: "+(u.losses||0)+
+        " | راهن: "+f(u.wagered||0)+" | خسارة صافية: "+f(Math.max(0,(u.wagered||0)-(u.returned||0)))+
+        " | فرصة النجاة: "+(u.surv!=null?u.surv+"%":"افتراضي");
+      d.appendChild(t);
+      const r=DB.ref("users/"+n);
+      mk(d,"زوّد رصيد","",()=>{const v=parseFloat(prompt("المبلغ الوهمي لإضافته لـ "+n+":"));if(v>0)r.child("balance").transaction(b=>r2((b||0)+v));});
+      mk(d,"اضبط الرصيد","b",()=>{const v=parseFloat(prompt("الرصيد الجديد لـ "+n+":"));if(v>=0)r.child("balance").set(r2(v));});
+      mk(d,"فرصة النجاة","b",()=>{
+        const v=prompt("فرصة النجاة % لكل صف (1-99) لـ "+n+". فاضي = الافتراضي:");
+        if(v===null)return; if(v.trim()==="")return r.child("surv").remove();
+        const x=parseFloat(v); if(!(x>=1&&x<=99))return alert("رقم من 1 إلى 99"); r.child("surv").set(x);
+      });
+      mk(d,u.closed?"افتح":"اغلق",u.closed?"":"r",()=>r.child("closed").set(!u.closed));
+      mk(d,"صفّر الإحصائيات","b",()=>{if(confirm("تصفير إحصائيات "+n+"؟"))r.update({rounds:0,wins:0,losses:0,wagered:0,returned:0,game:null});});
+      mk(d,"كلمة سر جديدة","b",async()=>{const v=prompt("كلمة السر الجديدة لـ "+n+" (6 أحرف على الأقل):");if(v&&v.length>=6)r.child("pw").set(await hash(v));});
+      mk(d,"احذف الحساب","r",()=>{if(confirm("حذف "+n+" نهائيًا؟"))r.remove();});
+      box.appendChild(d);
+    });
+  }
+
+  function textsForm(){
+    const box=$("t2"); box.innerHTML="";
+    const inputs={};
+    for(const k in DEF.texts){
+      const l=document.createElement("label"); l.textContent=TLABEL[k]; box.appendChild(l);
+      const i=document.createElement("input"); i.value=CFG.texts[k]; inputs[k]=i; box.appendChild(i);
+    }
+    const n=document.createElement("div"); n.style.cssText="font-size:12px;margin:8px 0;color:#ccc";
+    n.textContent="ملحوظة: التحذير الأحمر والتنبيه الرسمي (إن الرصيد وهمي والألعاب مضبوطة) ثابتين ومينفعش يتغيروا أو يتشالوا.";
+    box.appendChild(n);
+    mk(box,"احفظ النصوص","",()=>{const o={};for(const k in inputs)o[k]=inputs[k].value;DB.ref("config/texts").set(o).then(()=>alert("اتحفظ"));});
+    mk(box,"رجّع النصوص الافتراضية","r",()=>{if(confirm("متأكد؟"))DB.ref("config/texts").remove().then(()=>setTimeout(textsForm,400));});
+  }
+  function colorsForm(){
+    const box=$("t3"); box.innerHTML="";
+    const inputs={};
+    for(const k in DEF.colors){
+      const d=document.createElement("div"); d.className="cl";
+      const s=document.createElement("span"); s.textContent=CLABEL[k];
+      const i=document.createElement("input"); i.type="color"; i.value=CFG.colors[k]; inputs[k]=i;
+      d.append(s,i); box.appendChild(d);
+    }
+    mk(box,"احفظ الألوان","",()=>{const o={};for(const k in inputs)o[k]=inputs[k].value;DB.ref("config/colors").set(o).then(()=>alert("اتحفظ"));});
+    mk(box,"رجّع الألوان الافتراضية","r",()=>{if(confirm("متأكد؟"))DB.ref("config/colors").remove().then(()=>setTimeout(colorsForm,400));});
+  }
+  function settingsForm(){
+    const box=$("t4"); box.innerHTML="";
+    const add=(lab,val,type)=>{const l=document.createElement("label");l.textContent=lab;box.appendChild(l);const i=document.createElement("input");i.type=type||"number";i.value=val;box.appendChild(i);return i;};
+    const a=add("الرصيد الوهمي للحسابات الجديدة (مرة واحدة، مش بيأثر على القديمة)",CFG.initial);
+    const b=add("أقل رهان",CFG.minBet);
+    const c=add("الرهان الافتراضي في الخانة",CFG.defBet);
+    const d=add("نسبة العائد % (المضاعفات). كل ما قلّت زادت خسارة الكل",CFG.rtp);
+    const l=document.createElement("label"); const cb=document.createElement("input"); cb.type="checkbox"; cb.checked=CFG.registration; cb.style.cssText="width:auto;margin-left:8px";
+    l.append(cb,"السماح بتسجيل حسابات جديدة"); box.appendChild(l);
+    mk(box,"احفظ الإعدادات","",()=>{
+      DB.ref("config").update({initial:+a.value,minBet:+b.value,defBet:+c.value,rtp:Math.min(99,Math.max(1,+d.value)),registration:cb.checked}).then(()=>alert("اتحفظ"));
+    });
+  }
+
+  function enter(){
+    $("alogin").classList.add("hide"); $("apanel").classList.remove("hide");
+    if(started)return; started=true;
+    DB.ref("users").on("value",s=>accounts(s.val()));
+    DB.ref("config").once("value").then(s=>{merge(s.val());applyCfg();textsForm();colorsForm();settingsForm();});
+  }
+  document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{
+    document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("on",x===b));
+    ["t1","t2","t3","t4"].forEach(t=>$(t).classList.toggle("hide",t!==b.dataset.tab));
+  });
+  $("go").onclick=()=>{
+    if($("pin").value!==ADMIN_PIN){$("err").textContent="رقم غلط";return;}
+    sessionStorage.setItem("adm","1"); $("pin").value=""; enter();
+  };
+  $("aout").onclick=()=>{sessionStorage.removeItem("adm");location.reload();};
+  if(sessionStorage.getItem("adm")==="1")enter();
+}
+
+/* ================= التشغيل ================= */
+applyCfg();
+if(IS_ADMIN){
+  adminApp();
+}else{
+  $("bet").value=CFG.defBet;
+  $("bl").onclick=()=>auth("login");$("br").onclick=()=>auth("register");
+  $("out").onclick=()=>logout();
+  $("m2").onclick=()=>{mode=2;lastLoss=null;if(U)render();};
+  $("m3").onclick=()=>{mode=3;lastLoss=null;if(U)render();};
+  $("start").onclick=start;$("cash").onclick=cash;
+  let first=true;
+  DB.ref("config").on("value",s=>{
+    merge(s.val()); applyCfg();
+    if(first){$("bet").value=CFG.defBet;first=false;}
+    if(U){$("msg").textContent=$("msg").textContent||CFG.texts.msgStart;render();}
+  });
+  const saved=localStorage.getItem(SESS); if(saved)attach(saved); else show("auth");
+}
+</script></body></html>
